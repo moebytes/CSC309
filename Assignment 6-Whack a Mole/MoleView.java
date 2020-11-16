@@ -23,18 +23,19 @@ import java.util.Random;
 
 public class MoleView extends View {
     Paint strokePaint;
-    final int NUM_CONCURRENT_ACTIVE_MOLES   = 2;
-    final int NUM_OF_MOLES                  = 6;
-    final int MAX_FAIL_AMOUNT               = 20;
-    int backgroundRed                       = 100;
-    int backgroundGreen                     = 100;
-    int backgroundBlue                      = 255;
-    int timerDelay                          = 2000;
-    int circleColor                         = Color.WHITE;
-    static String END_GAME                  = "END_GAME";
+    final int numConcurrentActiveMoles  = 2;
+    final int numOfMoles                = 6;
+    final int MAX_FAIL_AMOUNT           = 20;
+    int backgroundRed                   = 100;
+    int backgroundGreen                 = 100;
+    int backgroundBlue                  = 255;
+    int timerDelay                      = 2000;
+    Calendar cal                        = Calendar.getInstance();
+    long prevTimeInMillis               = cal.getTimeInMillis();
+    int circleColor                     = Color.WHITE;
+    static String END_GAME              = "END_GAME";
     public static int firstRun;
     boolean isMoleDrawTimerRunning;
-    boolean isTimerDecThreadRunning;
     CircleParams[] objectsToDraw;
     int[] lastMole;
     int INITIAL_TIMER;
@@ -47,7 +48,7 @@ public class MoleView extends View {
         firstRun            = 1;
         WhackCount          = 0;
         failCount           = 0;
-        lastMole            = new int[NUM_CONCURRENT_ACTIVE_MOLES];
+        lastMole            = new int[numConcurrentActiveMoles];
         INITIAL_TIMER       = timerDelay;
         strokePaint         = new Paint();
         strokePaint.setColor( circleColor );
@@ -59,7 +60,7 @@ public class MoleView extends View {
         firstRun            = 1;
         WhackCount          = 0;
         failCount           = 0;
-        lastMole            = new int[NUM_CONCURRENT_ACTIVE_MOLES];
+        lastMole            = new int[numConcurrentActiveMoles];
         INITIAL_TIMER       = timerDelay;
         strokePaint         = new Paint();
         strokePaint.setColor( circleColor );
@@ -71,16 +72,18 @@ public class MoleView extends View {
     protected void onDraw( Canvas canvas ){
         // If we have maxed out our fail count we stop the game
             if (failCount >= MAX_FAIL_AMOUNT) {
+                resetCounters();
+                updateCounters();
                 String temp = MoleView.END_GAME;
                 Message message = MainActivity.handler.obtainMessage(2, temp);
                 message.sendToTarget();
-                firstRun = 1;
             }
 
             // Check if it's the first run. If it is, generate the circle's positions. If it's not, create timer threads and draw moles
             switch( firstRun ){
                 case 1:
                     resetCounters();
+                    updateCounters();
                     Log.e("onDraw", "onDraw() switch case ran case 1");
                     objectsToDraw = generateMoles( canvas );
                     canvas.drawRGB(backgroundRed, backgroundGreen, backgroundBlue);
@@ -89,7 +92,6 @@ public class MoleView extends View {
                 case 0:
                     // Draw circles
                     canvas.drawRGB(backgroundRed, backgroundGreen, backgroundBlue);
-                    updateCounters();
                     drawActiveMolesTimerThread();
                     drawMoles(canvas);
                     break;
@@ -100,20 +102,20 @@ public class MoleView extends View {
 
     // Generates each circle position and sets whether to draw them.
     protected CircleParams[] generateMoles(Canvas canvas){
-        CircleParams[] objectsToDraw = new CircleParams[NUM_OF_MOLES];
+        CircleParams[] objectsToDraw = new CircleParams[numOfMoles];
         float width     = canvas.getWidth();
         float height    = canvas.getHeight();
         float leftCol   = width / 3f;               // X position of left column
         float rightCol  = 2f * ( width / 3f );      // X position of right column
         float radius    = ( width / 4f ) / 2f;
         float yPos      = height / 4f;
-        float cy;
+        float cy        = 0;
         float cx;
 
-        for (int i = 0; i < NUM_OF_MOLES; i++){
+        for (int i = 0; i < numOfMoles; i++){
             // Set the width, cx, cy, whether to draw them
             // Set the x position
-            if (i < NUM_OF_MOLES / 2)
+            if (i < numOfMoles / 2)
                 cx = leftCol;
             else
                 cx =  rightCol;
@@ -130,7 +132,7 @@ public class MoleView extends View {
         float radius;
         float cx;
         float cy;
-        for (int i = 0; i < NUM_OF_MOLES; i++){
+        for (int i = 0; i < numOfMoles; i++){
             draw = objectsToDraw[i].getDraw();
             if( draw )
                 circleColor = Color.rgb(255, 65, 65);
@@ -144,65 +146,8 @@ public class MoleView extends View {
         }
     }
 
-    // Timer Thread to draw new moles
-    protected void drawActiveMolesTimerThread(){
-        // Check if there is already a thread running
-        if ( !isMoleDrawTimerRunning ){
-            // Create a number of mole timer threads according to the data member numConcurrentActiveMoles
-            isMoleDrawTimerRunning = true;
-            for (int i = 0; i < NUM_CONCURRENT_ACTIVE_MOLES; i++){
-                final int pos   = setRandomMoleActive();
-                lastMole[i]     = pos;
-            }
-            this.postDelayed( startMoleTimer(), timerDelay );
-        }
-        if ( !isTimerDecThreadRunning ){
-            isTimerDecThreadRunning = true;
-            this.postDelayed( decTimerVal(), INITIAL_TIMER );
-        }
-        invalidate();
-    }
-
-    // Starts a timer to indicate when to reset the moles
-    private Runnable startMoleTimer(){
-        return new Runnable(){
-            @Override
-            public void run(){
-                resetDrawAndInc();
-                isMoleDrawTimerRunning = false;
-                invalidate();
-            }
-        };
-    }
-
-    private Runnable decTimerVal(){
-        return new Runnable(){
-            @Override
-            public void run(){
-                setTimerDelay(timerDelay);
-                isTimerDecThreadRunning = false;
-                Log.e("", "TIMER: " + timerDelay);
-            }
-        };
-    }
-
-    // Reset active moles and increment counters
-    private void resetDrawAndInc(){
-        for (int i = 0; i < NUM_OF_MOLES; i++){
-            if (objectsToDraw[i].getDraw()){
-                failCount++;
-                objectsToDraw[i].isActiveMole = false;
-                objectsToDraw[i].setDraw(false);
-            }
-        }
-        updateCounters();
-        invalidate();
-    }
-
     // Updates the timer delay so that it does not scale exponentially
     protected void setTimerDelay(int curDelay){
-        if(firstRun == 1)
-            return;
         if ( curDelay > 1000 )
             timerDelay -= 100;
         else if ( curDelay > 800 )
@@ -214,13 +159,57 @@ public class MoleView extends View {
         }
     }
 
+    // Creates a new mole timer thread for the mole at the given position "pos" and the index of the loop that determines the # of active moles
+    private Runnable createNewMoleThread(final int pos, final int index){
+        return new Runnable() {
+            @Override
+            public void run() {
+                // Use system time to determine when to decrease the timer delay. Must Re-get the calendar because the time in milliseconds doesn't update otherwise
+                cal = Calendar.getInstance();
+                final long curTimeInMillis = cal.getTimeInMillis();
+                if ( curTimeInMillis - prevTimeInMillis >= INITIAL_TIMER ){
+                    setTimerDelay(timerDelay);
+                    prevTimeInMillis = cal.getTimeInMillis();
+                }
+                // If it wasn't clicked, it's still set to draw. Therefor the user missed it
+                if( objectsToDraw[pos].getDraw()){
+                    failCount++;
+                    objectsToDraw[pos].isActiveMole = false;
+                    objectsToDraw[pos].setDraw(false);
+                    lastMole[index] = pos;
+                }
+                // Set the last mole index here instead of outside the runnable because it
+                // needs to be set after the loop finishes so it doesn't overwrite the previous value with one from the current loop
+                isMoleDrawTimerRunning = false;
+                updateCounters();
+                invalidate();
+            }
+        };
+    }
+
+    // Timer Thread to draw new moles
+    protected void drawActiveMolesTimerThread(){
+        // Check if there is already a thread running
+        if ( !isMoleDrawTimerRunning ){
+            // Create a number of mole timer threads according to the data member numConcurrentActiveMoles
+            for (int i = 0; i < numConcurrentActiveMoles; i++){
+                final int pos = setRandomMoleActive();
+                final int index = i;
+                Runnable timerThread = createNewMoleThread( pos, index );
+                isMoleDrawTimerRunning = true;
+                this.postDelayed(timerThread, timerDelay);
+            }
+            invalidate();
+        }
+    }
+
     // Generates a random mole that has not been activated already, activates it, and returns its position
     protected int setRandomMoleActive(){
         Random rand = new Random();
         CircleParams temp;
         // Keep selecting until we get one that wasn't a previous mole, nor is already active
         do {
-            int random = rand.nextInt( objectsToDraw.length );
+            int random  = rand.nextInt( objectsToDraw.length );
             temp = objectsToDraw[random];
         } while( temp.isActiveMole || isLastChosenMole( temp.index ) );
 
@@ -241,6 +230,8 @@ public class MoleView extends View {
 
     // Updates the counters in MainActivity
     protected void updateCounters(){
+        if (firstRun == 1)
+            return;
         String temp = "Whack Counter: " + WhackCount;
         Message message = MainActivity.handler.obtainMessage(0, temp);
         message.sendToTarget();
@@ -254,6 +245,7 @@ public class MoleView extends View {
         timerDelay  = 2000;
         WhackCount  = 0;
         failCount   = 0;
+        firstRun    = 1;
     }
 
     // Gets the X and Y coordinates of a touch down event, and checks if:
