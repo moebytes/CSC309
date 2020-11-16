@@ -15,7 +15,7 @@ import android.widget.TextView;
     Author :    Peter Caylor
     Class  :    CSC 309
     Date   :    10/12/2020
-    Purpose:    Make a whack-a-mole game with an async timer and opengl
+    Purpose:    Make a whack-a-mole game with an async timer
  */
 
 public class MainActivity extends AppCompatActivity {
