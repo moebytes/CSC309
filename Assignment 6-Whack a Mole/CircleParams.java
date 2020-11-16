@@ -33,7 +33,8 @@ public class CircleParams {
     // Print out the object for testing
     @Override
     public String toString(){
-        Log.e("CircleParams.toString()", "Index  : " + index + "\n" +
+        Log.e("", "CircleParams.toString()\n" +
+                                                    "Index  : " + index + "\n" +
                                                     "Draw  : " + draw + "\n" +
                                                     "Active: " + isActiveMole + "\n" +
                                                     "CX    : " + cx + "\n" +
