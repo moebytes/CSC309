@@ -14,32 +14,32 @@ import android.util.Log;
 
 public class CircleParams {
 
-    private boolean     draw;
-    public boolean      isActiveMole;
-    private float       cx;
-    private float       cy;
-    private float       radius;
-    public int          index;
+    private boolean draw;
+    public boolean  isActiveMole;
+    private float   cx;
+    private float   cy;
+    private float   radius;
+    public int      index;
 
     public CircleParams(boolean draw, float cx, float cy, float radius, int index){
-        this.draw           = draw;
-        this.cx             = cx;
-        this.cy             = cy;
-        this.radius         = radius;
-        this.index          = index;
-        this.isActiveMole   = false;
+        this.draw         = draw;
+        this.cx           = cx;
+        this.cy           = cy;
+        this.radius       = radius;
+        this.index        = index;
+        this.isActiveMole = false;
     }
 
     // Print out the object for testing
     @Override
     public String toString(){
         Log.e("", "CircleParams.toString()\n" +
-                                                    "Index  : " + index + "\n" +
-                                                    "Draw  : " + draw + "\n" +
-                                                    "Active: " + isActiveMole + "\n" +
-                                                    "CX    : " + cx + "\n" +
-                                                    "CY    : " + cy + "\n" +
-                                                    "Radius: " + radius + "\n");
+                             "Index  : " + index + "\n" +
+                             "Draw  : " + draw + "\n" +
+                             "Active: " + isActiveMole + "\n" +
+                             "CX    : " + cx + "\n" +
+                             "CY    : " + cy + "\n" +
+                             "Radius: " + radius + "\n");
         return "";
     }
 
