@@ -1,7 +1,7 @@
 # CSC309
 Android Dev Class Projects and Assignments
 
-Assignment 6: A whack a mole game using a custom view.
+Assignment 6: A whack a mole game using a custom view with anonDraw override, and some async programming.
 
 Learned: 
 
