@@ -24,6 +24,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         // Create button event listener
         startButton = findViewById( R.id.start_game );
         startButton.setOnClickListener( new View.OnClickListener() {
@@ -50,17 +51,17 @@ public class MainActivity extends AppCompatActivity {
                 return;
             String new_text;
             // Set whack count
-            if (message.what == 0) {
+            if ( message.what == MsgEnum.msg_whack_counter.ordinal() ) {
                 new_text = message.obj.toString();
                 whack_counter.setText(new_text);
             }
             // Set miss count
-            if (message.what == 1) {
+            if ( message.what == MsgEnum.msg_miss_counter.ordinal() ) {
                 new_text = message.obj.toString();
                 miss_counter.setText(new_text);
             }
             // End game, make the start game button visible
-            if (message.what == 2) {
+            if ( message.what == MsgEnum.msg_end_game.ordinal() ) {
                 new_text = message.obj.toString();
                 if (new_text.equals(MoleView.END_GAME)){
                     startButton.setEnabled(true);

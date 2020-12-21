@@ -23,15 +23,15 @@ import java.util.Random;
 
 public class MoleView extends View {
     Paint strokePaint;
-    final int NUM_CONCURRENT_ACTIVE_MOLES   = 2;
-    final int NUM_OF_MOLES                  = 6;
-    final int MAX_FAIL_AMOUNT               = 20;
-    int backgroundRed                       = 100;
-    int backgroundGreen                     = 100;
-    int backgroundBlue                      = 255;
-    int timerDelay                          = 2000;
-    int circleColor                         = Color.WHITE;
-    static String END_GAME                  = "END_GAME";
+    final int NUM_CONCURRENT_ACTIVE_MOLES = 2;
+    final int NUM_OF_MOLES                = 6;
+    final int MAX_FAIL_AMOUNT             = 20;
+    int backgroundRed                     = 100;
+    int backgroundGreen                   = 100;
+    int backgroundBlue                    = 255;
+    int timerDelay                        = 2000;
+    int circleColor                       = Color.WHITE;
+    static String END_GAME                = "END_GAME";
     public static int firstRun;
     boolean isMoleDrawTimerRunning;
     boolean isTimerDecThreadRunning;
@@ -44,24 +44,24 @@ public class MoleView extends View {
     // Two constructors
     public MoleView (Context context) {
         super( context );
-        firstRun            = 1;
-        WhackCount          = 0;
-        failCount           = 0;
-        lastMole            = new int[NUM_CONCURRENT_ACTIVE_MOLES];
-        INITIAL_TIMER       = timerDelay;
-        strokePaint         = new Paint();
+        firstRun      = 1;
+        WhackCount    = 0;
+        failCount     = 0;
+        lastMole      = new int[NUM_CONCURRENT_ACTIVE_MOLES];
+        INITIAL_TIMER = timerDelay;
+        strokePaint   = new Paint();
         strokePaint.setColor( circleColor );
         strokePaint.setAntiAlias( true );
         strokePaint.setStyle( Paint.Style.FILL );
     }
     public MoleView(Context context, AttributeSet attributeset){
         super( context, attributeset );
-        firstRun            = 1;
-        WhackCount          = 0;
-        failCount           = 0;
-        lastMole            = new int[NUM_CONCURRENT_ACTIVE_MOLES];
-        INITIAL_TIMER       = timerDelay;
-        strokePaint         = new Paint();
+        firstRun      = 1;
+        WhackCount    = 0;
+        failCount     = 0;
+        lastMole      = new int[NUM_CONCURRENT_ACTIVE_MOLES];
+        INITIAL_TIMER = timerDelay;
+        strokePaint   = new Paint();
         strokePaint.setColor( circleColor );
         strokePaint.setAntiAlias( true );
         strokePaint.setStyle( Paint.Style.FILL );
@@ -71,8 +71,8 @@ public class MoleView extends View {
     protected void onDraw( Canvas canvas ){
         // If we have maxed out our fail count we stop the game
             if (failCount >= MAX_FAIL_AMOUNT) {
-                String temp = MoleView.END_GAME;
-                Message message = MainActivity.handler.obtainMessage(2, temp);
+                String temp           = MoleView.END_GAME;
+                Message message       = MainActivity.handler.obtainMessage( MsgEnum.msg_end_game.ordinal(), temp );
                 message.sendToTarget();
                 firstRun = 1;
             }
@@ -101,12 +101,12 @@ public class MoleView extends View {
     // Generates each circle position and sets whether to draw them.
     protected CircleParams[] generateMoles(Canvas canvas){
         CircleParams[] objectsToDraw = new CircleParams[NUM_OF_MOLES];
-        float width     = canvas.getWidth();
-        float height    = canvas.getHeight();
-        float leftCol   = width / 3f;               // X position of left column
-        float rightCol  = 2f * ( width / 3f );      // X position of right column
-        float radius    = ( width / 4f ) / 2f;
-        float yPos      = height / 4f;
+        float width    = canvas.getWidth();
+        float height   = canvas.getHeight();
+        float leftCol  = width / 3f;               // X position of left column
+        float rightCol = 2f * ( width / 3f );      // X position of right column
+        float radius   = ( width / 4f ) / 2f;
+        float yPos     = height / 4f;
         float cy;
         float cx;
 
@@ -137,9 +137,9 @@ public class MoleView extends View {
             else
                 circleColor = Color.WHITE;
             strokePaint.setColor( circleColor );
-            cx      = objectsToDraw[i].getCx();
-            cy      = objectsToDraw[i].getCy();
-            radius  = objectsToDraw[i].getRadius();
+            cx     = objectsToDraw[i].getCx();
+            cy     = objectsToDraw[i].getCy();
+            radius = objectsToDraw[i].getRadius();
             canvas.drawCircle(cx, cy, radius, strokePaint);
         }
     }
@@ -151,8 +151,8 @@ public class MoleView extends View {
             // Create a number of mole timer threads according to the data member numConcurrentActiveMoles
             isMoleDrawTimerRunning = true;
             for (int i = 0; i < NUM_CONCURRENT_ACTIVE_MOLES; i++){
-                final int pos   = setRandomMoleActive();
-                lastMole[i]     = pos;
+                final int pos = setRandomMoleActive();
+                lastMole[i]   = pos;
             }
             this.postDelayed( startMoleTimer(), timerDelay );
         }
@@ -241,19 +241,20 @@ public class MoleView extends View {
 
     // Updates the counters in MainActivity
     protected void updateCounters(){
-        String temp = "Whack Counter: " + WhackCount;
-        Message message = MainActivity.handler.obtainMessage(0, temp);
+        String temp     = "Whack Counter: " + WhackCount;
+        Message message = MainActivity.handler.obtainMessage( MsgEnum.msg_whack_counter.ordinal(), temp );
         message.sendToTarget();
-        temp = "Miss Counter: " + failCount;
-        message = MainActivity.handler.obtainMessage(1, temp);
+
+        temp    = "Miss Counter: " + failCount;
+        message = MainActivity.handler.obtainMessage( MsgEnum.msg_miss_counter.ordinal(), temp );
         message.sendToTarget();
     }
 
     // Reset counters
     protected void resetCounters(){
-        timerDelay  = 2000;
-        WhackCount  = 0;
-        failCount   = 0;
+        timerDelay = 2000;
+        WhackCount = 0;
+        failCount  = 0;
     }
 
     // Gets the X and Y coordinates of a touch down event, and checks if:
